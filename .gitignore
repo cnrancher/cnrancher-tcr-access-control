@@ -1,0 +1,38 @@
+# binary files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# build files
+tcr-access-control
+tac
+/build/
+/bin/
+/dist/
+
+# go test outputs
+*.test
+*.out
+*.converted
+
+# Dependency directories
+/vendor/
+
+# vscode config
+/.vscode/
+
+# Dapper
+.dapper
+Dockerfile.dapper*
+!Dockerfile.dapper
+
+# macOS
+.DS_Store
+
+# Go workspace file
+go.work
+
+# Temp files
+/tmp*
