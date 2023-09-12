@@ -46,6 +46,12 @@ func setValueFromFlag(flags *flag.FlagSet, key string, cfg config.Provider, targ
 		case "int":
 			iv, _ := flags.GetInt(key)
 			cfg.Set(configKey, iv)
+		case "int32":
+			iv, _ := flags.GetInt32(key)
+			cfg.Set(configKey, iv)
+		case "int64":
+			iv, _ := flags.GetInt64(key)
+			cfg.Set(configKey, iv)
 		default:
 			panic(fmt.Sprintf("update switch with %s", f.Value.Type()))
 		}

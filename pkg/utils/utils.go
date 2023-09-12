@@ -12,24 +12,20 @@ import (
 )
 
 var (
-	SECRET_ID_ENV_NAME  = "TENCENT_CLOUD_SECRET_ID"
-	SECRET_KEY_ENV_NAME = "TENCENT_CLOUD_SECRET_KEY"
-	REGION_ENV_NAME     = "TENCENT_CLOUD_REGION"
-	TAC_CONFIG_FILE     = path.Join(
+	SECRET_ID_ENV_NAME   = "TENCENT_CLOUD_SECRET_ID"
+	SECRET_KEY_ENV_NAME  = "TENCENT_CLOUD_SECRET_KEY"
+	REGION_ENV_NAME      = "TENCENT_CLOUD_REGION"
+	REGISTRY_ID_ENV_NAME = "TENCENT_CLOUD_REGISTRY_ID"
+	TAC_CONFIG_FILE      = path.Join(
 		os.Getenv("HOME"),
-		".tcr_access_controll.yaml",
+		".tcr_access_control.yaml",
 	)
 )
 
 var (
 	ClientProfile *profile.ClientProfile
 	Credential    *common.Credential
-
-	SecretID  = os.Getenv(SECRET_ID_ENV_NAME)
-	SecretKey = os.Getenv(SECRET_KEY_ENV_NAME)
-	Region    = os.Getenv(REGION_ENV_NAME)
-
-	Config *tcr_config.Config
+	Config        *tcr_config.Config
 
 	initialized bool
 )
@@ -40,56 +36,60 @@ func Init(configPath string) error {
 		Credential != nil && Config != nil {
 		return nil
 	}
-	logrus.Debugf("Start init config")
+	logrus.Debugf("Start init utils config")
+
+	configInitErrMsg := fmt.Sprintf("execute '%s init' first",
+		os.Args[0])
 
 	// load config
 	var err error
 	Config, err = tcr_config.LoadConfig(configPath)
 	if err != nil {
 		if !os.IsNotExist(err) {
-			return fmt.Errorf("utils.Init: %w", err)
+			return fmt.Errorf("LoadConfig: %w", err)
 		}
 		Config = &tcr_config.Config{}
 	}
-	if Region == "" {
-		Region = Config.Region
-	}
-	if SecretID == "" || SecretKey == "" {
-		if Config.SecretID != "" {
-			SecretID, err = DecryptAES(AesEncryptKey, Config.SecretID)
-			if err != nil {
-				return fmt.Errorf("failed to decrypt secretID: %w", err)
-			}
+	if Config.SecretID != "" {
+		Config.SecretID, err = DecryptAES(AesEncryptKey, Config.SecretID)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt secretID: %w", err)
 		}
-		if Config.SecretKey != "" {
-			SecretKey, err = DecryptAES(AesEncryptKey, Config.SecretKey)
-			if err != nil {
-				return fmt.Errorf("failed to decrypt secretKey: %w", err)
-			}
+	}
+	if Config.SecretKey != "" {
+		Config.SecretKey, err = DecryptAES(AesEncryptKey, Config.SecretKey)
+		if err != nil {
+			return fmt.Errorf("failed to decrypt secretKey: %w", err)
 		}
 	}
 
-	if SecretID == "" || SecretKey == "" {
-		return fmt.Errorf("%s & %s env not set",
-			SECRET_ID_ENV_NAME, SECRET_KEY_ENV_NAME)
+	if Config.SecretKey == "" || Config.SecretID == "" {
+		return fmt.Errorf("credential not set in config, " + configInitErrMsg)
 	}
-	if Region == "" {
-		return fmt.Errorf("%s env not set", REGION_ENV_NAME)
+	if Config.Region == "" {
+		return fmt.Errorf("region not set in config, " + configInitErrMsg)
+	}
+	if Config.RegistryID == "" {
+		return fmt.Errorf("registryID not set in config, " + configInitErrMsg)
 	}
 
 	logrus.Debugf("Set Language: %v", Config.Language)
 	logrus.Debugf("Set Region: %v", Config.Region)
-	logrus.Debugf("Set TCR Instance ID: %v", Config.InstanceID)
+	logrus.Debugf("Set TCR Instance ID: %v", Config.RegistryID)
+	if len(Config.SecretID) < 6 {
+		return fmt.Errorf("invalid secretID length, " + configInitErrMsg)
+	}
+	logrus.Debugf("Set SecretID: [%s*****]", Config.SecretID[:6])
 
 	ClientProfile = profile.NewClientProfile()
 	ClientProfile.Language = Config.Language
 	Credential = common.NewCredential(
-		SecretID,
-		SecretKey,
+		Config.SecretID,
+		Config.SecretKey,
 	)
 
 	initialized = true
-	logrus.Debugf("Finished init config")
+	logrus.Debugf("Finished init utils config")
 	return nil
 }
 

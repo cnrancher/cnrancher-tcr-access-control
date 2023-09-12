@@ -66,6 +66,28 @@ func (c *defaultConfigProvider) GetInt(key string) int {
 	return 0
 }
 
+func (c *defaultConfigProvider) GetInt32(key string) int32 {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	v := c.data[key]
+	switch v := v.(type) {
+	case int32:
+		return v
+	}
+	return 0
+}
+
+func (c *defaultConfigProvider) GetInt64(key string) int64 {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	v := c.data[key]
+	switch v := v.(type) {
+	case int64:
+		return v
+	}
+	return 0
+}
+
 func (c *defaultConfigProvider) GetBool(key string) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
@@ -83,6 +105,8 @@ func (c *defaultConfigProvider) Set(key string, value any) {
 	}
 	switch value.(type) {
 	case int:
+	case int32:
+	case int64:
 	case string:
 	case []string:
 	case bool:
@@ -114,6 +138,13 @@ func GetInt(k string) int {
 	return DefaultProvider.GetInt(k)
 }
 
+func GetInt32(k string) int32 {
+	return DefaultProvider.GetInt32(k)
+}
+
+func GetInt64(k string) int64 {
+	return DefaultProvider.GetInt64(k)
+}
 func GetBool(k string) bool {
 	return DefaultProvider.GetBool(k)
 }

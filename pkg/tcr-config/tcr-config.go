@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 )
 
@@ -12,11 +13,12 @@ type Config struct {
 	Region     string `json:"region" yaml:"region"`
 	SecretID   string `json:"secretID" yaml:"secretID"`
 	SecretKey  string `json:"secretKey" yaml:"secretKey"`
-	InstanceID string `json:"instanceID" yaml:"instanceID"`
+	RegistryID string `json:"registryID" yaml:"registryID"`
 }
 
 // LoadConfig loads the config from file path
 func LoadConfig(filename string) (*Config, error) {
+	logrus.Debugf("Load config from %q", filename)
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("LoadConfig: %w", err)

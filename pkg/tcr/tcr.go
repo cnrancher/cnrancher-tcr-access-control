@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cnrancher/tcr-access-control/pkg/utils"
+	"github.com/sirupsen/logrus"
 	tcrapi "github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/tcr/v20190924"
 )
 
@@ -18,11 +19,12 @@ func Init() error {
 	if initialized && Client != nil {
 		return nil
 	}
+	logrus.Debugf("Start init TCR API")
 
 	var err error
 	Client, err = tcrapi.NewClient(
 		utils.Credential,
-		utils.Region,
+		utils.Config.Region,
 		utils.ClientProfile,
 	)
 	if err != nil {
@@ -30,23 +32,41 @@ func Init() error {
 	}
 
 	initialized = true
+	logrus.Debugf("Finished init TCR API")
 	return nil
 }
 
-// DescribeExternalEndpointStatus
-// 查询实例公网访问入口状态
 func DescribeExternalEndpointStatus() (*tcrapi.DescribeExternalEndpointStatusResponse, error) {
 	request := tcrapi.NewDescribeExternalEndpointStatusRequest()
-	request.RegistryId = &utils.Config.InstanceID
+	request.RegistryId = &utils.Config.RegistryID
 
-	response, err := Client.DescribeExternalEndpointStatus(request)
-	return response, err
+	return Client.DescribeExternalEndpointStatus(request)
 }
 
 func DescribeSecurityPolicies() (*tcrapi.DescribeSecurityPoliciesResponse, error) {
 	request := tcrapi.NewDescribeSecurityPoliciesRequest()
-	request.RegistryId = &utils.Config.InstanceID
+	request.RegistryId = &utils.Config.RegistryID
 
-	response, err := Client.DescribeSecurityPolicies(request)
-	return response, err
+	return Client.DescribeSecurityPolicies(request)
+}
+
+func CreateSecurityPolicy(
+	cidr, description string,
+) (*tcrapi.CreateSecurityPolicyResponse, error) {
+	request := tcrapi.NewCreateSecurityPolicyRequest()
+	request.RegistryId = &utils.Config.RegistryID
+	request.CidrBlock = &cidr
+	request.Description = &description
+	return Client.CreateSecurityPolicy(request)
+}
+
+func DeleteSecurityPolicy(
+	index int64, cidr, version string,
+) (*tcrapi.DeleteSecurityPolicyResponse, error) {
+	request := tcrapi.NewDeleteSecurityPolicyRequest()
+	request.RegistryId = &utils.Config.RegistryID
+	request.PolicyIndex = &index
+	request.PolicyVersion = &version
+	request.CidrBlock = &cidr
+	return Client.DeleteSecurityPolicy(request)
 }

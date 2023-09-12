@@ -21,13 +21,12 @@ func newConfigCmd() *configCmd {
 	cc.baseCmd.cmd = &cobra.Command{
 		Use:   "init",
 		Short: "Setup Tencent Cloud Config",
-		Example: `
-  	tcr-access-control init \
-	  	--instanceID=<tcr-instance-id> \
-	  	--language=zh-CN \
-	  	--region=ap-guangzhou \
-	  	--secretID=xxx \
-	  	--secretKey=xxx`,
+		Example: `  tcr-access-control init \
+	--registryID=<tcr-instance-id> \
+	--language=zh-CN \
+	--region=ap-guangzhou \
+	--secretID=xxx \
+	--secretKey=xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			initializeFlagsConfig(cmd, config.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
@@ -38,7 +37,7 @@ func newConfigCmd() *configCmd {
 			cfg := tcr_config.Config{}
 			if config.GetString("secretID") != "" &&
 				config.GetString("secretKey") != "" &&
-				config.GetString("instanceID") != "" {
+				config.GetString("registryID") != "" {
 				// Get config from command-line parameter
 				cfg = tcr_config.Config{
 					Language:  config.GetString("language"),
@@ -57,7 +56,7 @@ func newConfigCmd() *configCmd {
 				if err != nil {
 					return fmt.Errorf("Failed to encrypt secretKey: %v", err)
 				}
-				cfg.InstanceID = config.GetString("instanceID")
+				cfg.RegistryID = config.GetString("registryID")
 			} else {
 				// Get config from user input
 				logrus.Infof("Start init config:")
@@ -107,8 +106,8 @@ func newConfigCmd() *configCmd {
 				}
 
 				fmt.Printf("TCR Instance ID: ")
-				fmt.Scanf("%s", &cfg.InstanceID)
-				if cfg.InstanceID == "" {
+				fmt.Scanf("%s", &cfg.RegistryID)
+				if cfg.RegistryID == "" {
 					return fmt.Errorf("TCR Instance ID should not be empty")
 				}
 			}
@@ -120,7 +119,7 @@ func newConfigCmd() *configCmd {
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Saved config to [%v]", config.GetString("config"))
+			logrus.Infof("Saved config to %q", config.GetString("config"))
 			return nil
 		},
 	}
@@ -128,7 +127,7 @@ func newConfigCmd() *configCmd {
 	cc.cmd.Flags().StringP("region", "r", "ap-guangzhou", "Region")
 	cc.cmd.Flags().StringP("secretID", "", "", "secretID")
 	cc.cmd.Flags().StringP("secretKey", "", "", "secretKey")
-	cc.cmd.Flags().StringP("instanceID", "", "", "instanceID")
+	cc.cmd.Flags().StringP("registryID", "", "", "registryID")
 	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE, "config file")
 
 	return cc

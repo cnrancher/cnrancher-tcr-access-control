@@ -11,19 +11,52 @@ Requirements:
 - OS: Linux/Unix
 
 ```bash
-# Build
+# Build & Install
 git clone https://github.com/cnrancher/tcr-access-control.git && cd tcr-access-control
-go build .
-
-# Show usage
-./tcr-access-control -h
-
-# Init config
-./tcr-access-control init
-
-# Get security policies
-./tcr-access-control status
+go build . && go install
 ```
+
+1. Show usage:
+    ```console
+    $ tcr-access-control -h
+    tcr-access-control is a tool for manage the
+    Tencent Cloud TCR access security policies.
+    ......
+    ```
+
+1. Init config (default config path is `$HOME/.tcr_access_control.yaml`):
+    ```console
+    $ tcr-access-control init
+    17:00:00 [INFO] Start init config:
+    Default language (zh-CN/en-US) (default: en-US):
+    ......
+    ```
+
+1. Show existing security policies:
+    ```console
+    $ tcr-access-control status
+    17:00:00 [INFO] External Endpoint Status: Opened
+    17:00:00 [INFO] Security Policies:
+    INDEX |        CIDR        |  Description
+    ------+--------------------+--------------
+        0 |      123.12.0.0/24 | Example Description
+        1 |          127.0.0.1 | Example
+    ------+--------------------+--------------
+    ```
+
+1. Add one IP address (CIDR block) to security policy:
+    ```console
+    $ tcr-access-control allow --ip "8.8.8.8" --description="TEST"
+    18:00:00 [INFO] Successfully add "8.8.8.8" to security policy
+    ```
+
+1. Remove one IP address from security policy:
+    ```console
+    $ tcr-access-control remove --ip "8.8.8.8" --index=3
+    Security policy index [3] version [14] CIDR [8.8.8.8] will be delete! Confirm [y/N]: y
+    DOUBLE CONFIRM! [y/N]: y
+    18:00:00 [INFO] Successfully remove "8.8.8.8" from security policy
+    ```
 
 ## LICENSE
 

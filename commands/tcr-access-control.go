@@ -30,10 +30,9 @@ func newTACCmd() *tacCmd {
 		Use:   "tcr-access-control",
 		Short: "tcr-access-control usage",
 		Long: `tcr-access-control is a tool for manage the
-Tencent cloud TCR access control security policies.
+Tencent Cloud TCR access security policies.
 
-https://github.com/cnrancher/tcr-access-control
-`,
+https://github.com/cnrancher/tcr-access-control`,
 		Run: func(cmd *cobra.Command, args []string) {
 			initializeFlagsConfig(cmd, config.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
@@ -60,7 +59,7 @@ func (cc *tacCmd) addCommands() {
 	addCommands(
 		cc.cmd,
 		newAllowCmd(),
-		newDeleteCmd(),
+		newRemoveCmd(),
 		newStatusCmd(),
 		newConfigCmd(),
 		newVersionCmd(),
