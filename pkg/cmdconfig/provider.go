@@ -1,4 +1,4 @@
-package config
+package cmdconfig
 
 type Provider interface {
 	Get(key string) any

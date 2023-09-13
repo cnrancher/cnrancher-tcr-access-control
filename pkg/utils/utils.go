@@ -5,7 +5,7 @@ import (
 	"os"
 	"path"
 
-	tcr_config "github.com/cnrancher/tcr-access-control/pkg/tcr-config"
+	"github.com/cnrancher/tcr-access-control/pkg/config"
 	"github.com/sirupsen/logrus"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common"
 	"github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common/profile"
@@ -25,7 +25,7 @@ var (
 var (
 	ClientProfile *profile.ClientProfile
 	Credential    *common.Credential
-	Config        *tcr_config.Config
+	Config        *config.Config
 
 	initialized bool
 )
@@ -38,29 +38,13 @@ func Init(configPath string) error {
 	}
 	logrus.Debugf("Start init utils config")
 
-	configInitErrMsg := fmt.Sprintf("execute '%s init' first",
-		os.Args[0])
+	configInitErrMsg := fmt.Sprintf("execute '%s init' first", os.Args[0])
 
 	// load config
 	var err error
-	Config, err = tcr_config.LoadConfig(configPath)
+	Config, err = config.LoadConfig(configPath)
 	if err != nil {
-		if !os.IsNotExist(err) {
-			return fmt.Errorf("LoadConfig: %w", err)
-		}
-		Config = &tcr_config.Config{}
-	}
-	if Config.SecretID != "" {
-		Config.SecretID, err = DecryptAES(AesEncryptKey, Config.SecretID)
-		if err != nil {
-			return fmt.Errorf("failed to decrypt secretID: %w", err)
-		}
-	}
-	if Config.SecretKey != "" {
-		Config.SecretKey, err = DecryptAES(AesEncryptKey, Config.SecretKey)
-		if err != nil {
-			return fmt.Errorf("failed to decrypt secretKey: %w", err)
-		}
+		return fmt.Errorf("LoadConfig: %w", err)
 	}
 
 	if Config.SecretKey == "" || Config.SecretID == "" {
@@ -73,13 +57,22 @@ func Init(configPath string) error {
 		return fmt.Errorf("registryID not set in config, " + configInitErrMsg)
 	}
 
+	Config.SecretID, err = DecryptAES(AesEncryptKey, Config.SecretID)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt secretID: %w", err)
+	}
+	Config.SecretKey, err = DecryptAES(AesEncryptKey, Config.SecretKey)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt secretKey: %w", err)
+	}
+
 	logrus.Debugf("Set Language: %v", Config.Language)
 	logrus.Debugf("Set Region: %v", Config.Region)
 	logrus.Debugf("Set TCR Instance ID: %v", Config.RegistryID)
-	if len(Config.SecretID) < 6 {
+	if len(Config.SecretID) < 8 {
 		return fmt.Errorf("invalid secretID length, " + configInitErrMsg)
 	}
-	logrus.Debugf("Set SecretID: [%s*****]", Config.SecretID[:6])
+	logrus.Debugf("Set SecretID: [%s*****]", Config.SecretID[:8])
 
 	ClientProfile = profile.NewClientProfile()
 	ClientProfile.Language = Config.Language

@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/cnrancher/tcr-access-control/pkg/config"
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
 )
 
-func initializeFlagsConfig(cmd *cobra.Command, cfg config.Provider) {
+func initializeFlagsConfig(cmd *cobra.Command, cfg cmdconfig.Provider) {
 	if cmd.Parent() != nil {
 		initializeFlagsConfig(cmd.Parent(), cfg)
 	}
@@ -25,7 +25,7 @@ func initializeFlagsConfig(cmd *cobra.Command, cfg config.Provider) {
 	}
 }
 
-func setValueFromFlag(flags *flag.FlagSet, key string, cfg config.Provider, targetKey string) {
+func setValueFromFlag(flags *flag.FlagSet, key string, cfg cmdconfig.Provider, targetKey string) {
 	key = strings.TrimSpace(key)
 	if flags.Lookup(key) != nil || flags.Changed(key) {
 		f := flags.Lookup(key)

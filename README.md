@@ -1,6 +1,7 @@
 # TCR Access Control (TAC)
 
-Manage the Tencent Cloud TCR access control security policies.
+Command line tool for managing the Tencent Cloud TCR ([容器镜像服务](https://cloud.tencent.com/document/product/1141/39278))
+public access control (访问控制 -> 公网访问白名单) security policies.
 
 FYI: <https://cloud.tencent.com/document/api/1141/53906>
 
@@ -10,17 +11,17 @@ Requirements:
 - Go: 1.20+
 - OS: Linux/Unix
 
-```bash
-# Build & Install
-git clone https://github.com/cnrancher/tcr-access-control.git && cd tcr-access-control
-go build . && go install
-```
+1. Build & Install
+    ```console
+    $ git clone https://github.com/cnrancher/tcr-access-control.git && cd tcr-access-control
+    $ go build . && go install
+    ```
 
 1. Show usage:
     ```console
     $ tcr-access-control -h
-    tcr-access-control is a tool for manage the
-    Tencent Cloud TCR access security policies.
+    tcr-access-control is a tool for manage the Tencent Cloud
+    TCR public access (访问控制 -> 公网访问白名单) security policies.
     ......
     ```
 
@@ -33,6 +34,9 @@ go build . && go install
     ```
 
 1. Show existing security policies:
+
+    You need to ensure that the External Endpoint (公网访问入口) Status is **Opened** before running this command.
+
     ```console
     $ tcr-access-control status
     17:00:00 [INFO] External Endpoint Status: Opened
@@ -44,17 +48,39 @@ go build . && go install
     ------+--------------------+--------------
     ```
 
-1. Add one IP address (CIDR block) to security policy:
+    Output in JSON format:
+
+    ```console
+    $ tcr-access-control status --json
+    {
+      "status": "Opened",
+      "reason": "",
+      "policies": [
+        {
+          "index": 0,
+          "cidr": "1.2.3.4",
+          "description": "Example"
+        },
+        {
+          "index": 1,
+          "cidr": "8.8.8.8/32",
+          "description": "TEST"
+        }
+      ]
+    }
+    ```
+
+1. Add one IP address (or CIDR block) to security policy:
     ```console
     $ tcr-access-control allow --ip "8.8.8.8" --description="TEST"
     18:00:00 [INFO] Successfully add "8.8.8.8" to security policy
     ```
 
-1. Remove one IP address from security policy:
+1. Remove one IP address (or CIDR block) from security policy:
     ```console
     $ tcr-access-control remove --ip "8.8.8.8" --index=3
-    Security policy index [3] version [14] CIDR [8.8.8.8] will be delete! Confirm [y/N]: y
-    DOUBLE CONFIRM! [y/N]: y
+    Security policy index [3] version [14] CIDR [8.8.8.8] will be delete!
+    Confirm [y/N]: y
     18:00:00 [INFO] Successfully remove "8.8.8.8" from security policy
     ```
 

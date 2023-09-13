@@ -1,10 +1,10 @@
 package commands
 
 import (
-	"encoding/json"
 	"fmt"
 
-	"github.com/cnrancher/tcr-access-control/pkg/config"
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
+	"github.com/cnrancher/tcr-access-control/pkg/policystatus"
 	"github.com/cnrancher/tcr-access-control/pkg/tcr"
 	"github.com/cnrancher/tcr-access-control/pkg/utils"
 	"github.com/sirupsen/logrus"
@@ -23,10 +23,10 @@ func newStatusCmd() *statusCmd {
 		Short:   "Show status",
 		Example: `  tcr-access-control status`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initializeFlagsConfig(cmd, config.DefaultProvider)
+			initializeFlagsConfig(cmd, cmdconfig.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
 
-			err := utils.Init(config.GetString("config"))
+			err := utils.Init(cmdconfig.GetString("config"))
 			if err != nil {
 				return fmt.Errorf("utils Init failed: %w", err)
 			}
@@ -34,60 +34,45 @@ func newStatusCmd() *statusCmd {
 			if err = tcr.Init(); err != nil {
 				return fmt.Errorf("TCR Init failed: %w", err)
 			}
-			status, err := tcr.DescribeExternalEndpointStatus()
+
+			statusRes, err := tcr.DescribeExternalEndpointStatus()
 			if err != nil {
 				return fmt.Errorf("DescribeExternalEndpointStatus: %w", err)
 			}
-			if status != nil && status.Response != nil {
-				if !config.GetBool("json") {
-					logrus.Printf("External Endpoint Status: %v",
-						utils.Value(status.Response.Status))
-					if utils.Value(status.Response.Reason) != "" {
-						logrus.Printf("Reason: %v\n",
-							utils.Value(status.Response.Reason))
-					}
-				}
+			logrus.Debugf("%v", statusRes.ToJsonString())
+
+			status := policystatus.Status{}
+			if statusRes != nil && statusRes.Response != nil {
+				status.Status = utils.Value(statusRes.Response.Status)
+				status.Reason = utils.Value(statusRes.Response.Reason)
 			}
 
 			securityPolicies, err := tcr.DescribeSecurityPolicies()
 			if err != nil {
-				return fmt.Errorf("DescribeSecurityPolicies: %w", err)
+				// DescribeSecurityPolicies will fail when External Endpoint
+				// status is not Open
+				logrus.Warnf("Error when DescribeSecurityPolicies: %v", err)
+				logrus.Warnf(
+					"Please ensure the External Endpoint Status is 'Opened'")
+				err = nil
 			}
+
 			if securityPolicies != nil && securityPolicies.Response != nil &&
 				securityPolicies.Response.SecurityPolicySet != nil {
-				set := securityPolicies.Response.SecurityPolicySet
-				if config.GetBool("json") {
-					type policy struct {
-						Index       int64  `json:"index"`
-						CIDR        string `json:"cidr"`
-						Description string `json:"description"`
+				for _, s := range securityPolicies.Response.SecurityPolicySet {
+					p := policystatus.SecurityPolicy{
+						Index:       utils.Value(s.PolicyIndex),
+						CIDR:        utils.Value(s.CidrBlock),
+						Description: utils.Value(s.Description),
 					}
-
-					policies := []policy{}
-					for _, s := range set {
-						policies = append(policies, policy{
-							Index:       utils.Value(s.PolicyIndex),
-							CIDR:        utils.Value(s.CidrBlock),
-							Description: utils.Value(s.Description),
-						})
-					}
-					data, _ := json.MarshalIndent(policies, "", "    ")
-					fmt.Printf("%v\n", string(data))
-				} else {
-					logrus.Printf("Security Policies:")
-					fmt.Printf("INDEX |        CIDR        |  Description\n")
-					fmt.Printf("------+--------------------+--------------\n")
-					for _, s := range set {
-						fmt.Printf(" %4d | %18s | %v \n",
-							utils.Value(s.PolicyIndex),
-							utils.Value(s.CidrBlock),
-							utils.Value(s.Description),
-						)
-					}
-					fmt.Printf("------+--------------------+--------------\n")
+					status.Policies = append(status.Policies, p)
 				}
+			}
+
+			if cmdconfig.GetBool("json") {
+				fmt.Println(status.Json())
 			} else {
-				return fmt.Errorf("No security policies found.")
+				fmt.Print(status.String())
 			}
 
 			return nil
@@ -102,4 +87,8 @@ func newStatusCmd() *statusCmd {
 
 func (cc *statusCmd) getCommand() *cobra.Command {
 	return cc.cmd
+}
+
+func (cc *statusCmd) printStatusMsg() {
+
 }

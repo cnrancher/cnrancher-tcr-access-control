@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	AesEncryptKey = "tcr-access-control-secret-012345"
+	AesEncryptKey = "tcr-access-control-secret-012345" // 32 bytes length
 )
 
 func EncryptAES(key string, text string) (string, error) {

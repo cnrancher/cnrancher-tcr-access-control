@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	"github.com/cnrancher/tcr-access-control/pkg/config"
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
 	"github.com/cnrancher/tcr-access-control/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -21,7 +21,7 @@ func newVersionCmd() *versionCmd {
 		Short:   "Show version",
 		Example: "  tcr-access-control version",
 		Run: func(cmd *cobra.Command, args []string) {
-			initializeFlagsConfig(cmd, config.DefaultProvider)
+			initializeFlagsConfig(cmd, cmdconfig.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
 			fmt.Printf("tcr-access-control version %s\n", getVersion())
 		},

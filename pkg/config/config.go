@@ -1,4 +1,4 @@
-package tcr_config
+package config
 
 import (
 	"fmt"
@@ -31,7 +31,6 @@ func LoadConfig(filename string) (*Config, error) {
 }
 
 // SaveConfig saves config into file
-// (this method only use in test purpose)
 func SaveConfig(config *Config, filename string) error {
 	data, err := yaml.Marshal(config)
 	if err != nil {

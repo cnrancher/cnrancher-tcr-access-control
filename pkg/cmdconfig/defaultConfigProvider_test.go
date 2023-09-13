@@ -1,22 +1,22 @@
-package config_test
+package cmdconfig_test
 
 import (
 	"reflect"
 	"testing"
 
-	"github.com/cnrancher/tcr-access-control/pkg/config"
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
 )
 
 func init() {
-	config.Set("string", "value")
-	config.Set("int", 1)
-	config.Set("bool", true)
-	config.Set("stringSlice", []string{"a", "b"})
+	cmdconfig.Set("string", "value")
+	cmdconfig.Set("int", 1)
+	cmdconfig.Set("bool", true)
+	cmdconfig.Set("stringSlice", []string{"a", "b"})
 }
 
 func Test_Get(t *testing.T) {
 	// when key is "", get the config data map
-	v := config.Get("")
+	v := cmdconfig.Get("")
 	switch v := v.(type) {
 	case map[string]any:
 		// check data
@@ -25,7 +25,7 @@ func Test_Get(t *testing.T) {
 			return
 		}
 		v["int"] = 2
-		if config.GetInt("int") != 1 {
+		if cmdconfig.GetInt("int") != 1 {
 			t.Error("failed")
 		}
 	default:
@@ -33,7 +33,7 @@ func Test_Get(t *testing.T) {
 		return
 	}
 
-	v = config.Get("int")
+	v = cmdconfig.Get("int")
 	switch v := v.(type) {
 	case int:
 		if v != 1 {
@@ -45,53 +45,53 @@ func Test_Get(t *testing.T) {
 }
 
 func Test_GetString(t *testing.T) {
-	v := config.GetString("string")
+	v := cmdconfig.GetString("string")
 	if v != "value" {
 		t.Error("failed")
 	}
-	v = config.GetString("aaa")
+	v = cmdconfig.GetString("aaa")
 	if v != "" {
 		t.Error("failed")
 	}
 }
 
 func Test_GetStringSlice(t *testing.T) {
-	v := config.GetStringSlice("stringSlice")
+	v := cmdconfig.GetStringSlice("stringSlice")
 	if !reflect.DeepEqual(v, []string{"a", "b"}) {
 		t.Error("failed")
 	}
-	v = config.GetStringSlice("aaa")
+	v = cmdconfig.GetStringSlice("aaa")
 	if v != nil {
 		t.Errorf("failed: %++v\n", v)
 	}
 }
 
 func Test_Int(t *testing.T) {
-	v := config.GetInt("int")
+	v := cmdconfig.GetInt("int")
 	if v != 1 {
 		t.Error("failed")
 	}
-	if config.GetInt("aaa") != 0 {
+	if cmdconfig.GetInt("aaa") != 0 {
 		t.Error("failed")
 	}
 }
 
 func Test_GetBool(t *testing.T) {
-	v := config.GetBool("bool")
+	v := cmdconfig.GetBool("bool")
 	if !v {
 		t.Error("failed")
 	}
-	if config.GetBool("aaa") {
+	if cmdconfig.GetBool("aaa") {
 		t.Error("failed")
 	}
 }
 
 func Test_IsSet(t *testing.T) {
-	config.Set("key", "value")
-	if !config.IsSet("key") {
+	cmdconfig.Set("key", "value")
+	if !cmdconfig.IsSet("key") {
 		t.Error("failed")
 	}
-	if config.IsSet("aaa") {
+	if cmdconfig.IsSet("aaa") {
 		t.Error("failed")
 	}
 }

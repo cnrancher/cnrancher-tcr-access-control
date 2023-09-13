@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
 	"github.com/cnrancher/tcr-access-control/pkg/config"
-	tcr_config "github.com/cnrancher/tcr-access-control/pkg/tcr-config"
 	"github.com/cnrancher/tcr-access-control/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -28,22 +28,22 @@ func newConfigCmd() *configCmd {
 	--secretID=xxx \
 	--secretKey=xxx`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initializeFlagsConfig(cmd, config.DefaultProvider)
+			initializeFlagsConfig(cmd, cmdconfig.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
-			if config.GetString("config") == "" {
+			if cmdconfig.GetString("config") == "" {
 				return fmt.Errorf("config file not specified")
 			}
-			logrus.Debugf("config file: %v", config.GetString("config"))
-			cfg := tcr_config.Config{}
-			if config.GetString("secretID") != "" &&
-				config.GetString("secretKey") != "" &&
-				config.GetString("registryID") != "" {
+			logrus.Debugf("config file: %v", cmdconfig.GetString("config"))
+			cfg := config.Config{}
+			if cmdconfig.GetString("secretID") != "" &&
+				cmdconfig.GetString("secretKey") != "" &&
+				cmdconfig.GetString("registryID") != "" {
 				// Get config from command-line parameter
-				cfg = tcr_config.Config{
-					Language:  config.GetString("language"),
-					Region:    config.GetString("region"),
-					SecretID:  config.GetString("secretID"),
-					SecretKey: config.GetString("secretKey"),
+				cfg = config.Config{
+					Language:  cmdconfig.GetString("language"),
+					Region:    cmdconfig.GetString("region"),
+					SecretID:  cmdconfig.GetString("secretID"),
+					SecretKey: cmdconfig.GetString("secretKey"),
 				}
 				var err error
 				cfg.SecretID, err = utils.EncryptAES(
@@ -56,7 +56,7 @@ func newConfigCmd() *configCmd {
 				if err != nil {
 					return fmt.Errorf("Failed to encrypt secretKey: %v", err)
 				}
-				cfg.RegistryID = config.GetString("registryID")
+				cfg.RegistryID = cmdconfig.GetString("registryID")
 			} else {
 				// Get config from user input
 				logrus.Infof("Start init config:")
@@ -115,11 +115,11 @@ func newConfigCmd() *configCmd {
 			b, _ := json.MarshalIndent(cfg, "", "  ")
 			logrus.Debugf("config: %v", string(b))
 
-			err := tcr_config.SaveConfig(&cfg, config.GetString("config"))
+			err := config.SaveConfig(&cfg, cmdconfig.GetString("config"))
 			if err != nil {
 				return err
 			}
-			logrus.Infof("Saved config to %q", config.GetString("config"))
+			logrus.Infof("Saved config to %q", cmdconfig.GetString("config"))
 			return nil
 		},
 	}

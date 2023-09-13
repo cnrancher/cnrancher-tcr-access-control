@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/cnrancher/tcr-access-control/pkg/config"
+	"github.com/cnrancher/tcr-access-control/pkg/cmdconfig"
 	"github.com/cnrancher/tcr-access-control/pkg/tcr"
 	"github.com/cnrancher/tcr-access-control/pkg/utils"
 	"github.com/sirupsen/logrus"
@@ -25,11 +25,11 @@ func newAllowCmd() *allowCmd {
 	--ip="192.168.0.0/24" \
 	--description="Example"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			initializeFlagsConfig(cmd, config.DefaultProvider)
+			initializeFlagsConfig(cmd, cmdconfig.DefaultProvider)
 			logrus.Debugf("Debug output enabled")
-			cidr := config.GetString("ip")
+			cidr := cmdconfig.GetString("ip")
 			if cidr == "" {
-				logrus.Errorf("ip not provided")
+				logrus.Errorf("ip (CIDR block) not provided")
 				cc.cmd.Usage()
 				return fmt.Errorf("ip not provided")
 			}
@@ -48,14 +48,14 @@ func newAllowCmd() *allowCmd {
 					"invalid IP %q, only IPv4 allowed", cidr)
 			}
 
-			if err := utils.Init(config.GetString("config")); err != nil {
+			if err := utils.Init(cmdconfig.GetString("config")); err != nil {
 				return err
 			}
 			if err := tcr.Init(); err != nil {
 				return err
 			}
 			response, err := tcr.CreateSecurityPolicy(
-				cidr, config.GetString("description"))
+				cidr, cmdconfig.GetString("description"))
 			if err != nil {
 				return fmt.Errorf(
 					"CreateMultipleSecurityPolicy failed: %w", err)
