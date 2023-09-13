@@ -39,8 +39,10 @@ Requirements:
 
     ```console
     $ tcr-access-control status
-    17:00:00 [INFO] External Endpoint Status: Opened
-    17:00:00 [INFO] Security Policies:
+    External Endpoint (公网访问入口) Status: Opened
+
+    Security Policies:
+    ------+--------------------+--------------
     INDEX |        CIDR        |  Description
     ------+--------------------+--------------
         0 |      123.12.0.0/24 | Example Description
