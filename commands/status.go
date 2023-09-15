@@ -79,8 +79,8 @@ func newStatusCmd() *statusCmd {
 		},
 	}
 
-	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE, "Config file")
-	cc.cmd.Flags().BoolP("json", "", false, "Json format")
+	cc.cmd.Flags().StringP("config", "", "", "Config file (default \"$HOME/.tcr_access_control.yaml\")")
+	cc.cmd.Flags().BoolP("json", "", false, "JSON format")
 
 	return cc
 }

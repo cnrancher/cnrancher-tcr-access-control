@@ -11,12 +11,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type configCmd struct {
+type initCmd struct {
 	baseCmd
 }
 
-func newConfigCmd() *configCmd {
-	cc := &configCmd{}
+func newInitCmd() *initCmd {
+	cc := &initCmd{}
 
 	cc.baseCmd.cmd = &cobra.Command{
 		Use:   "init",
@@ -128,11 +128,11 @@ func newConfigCmd() *configCmd {
 	cc.cmd.Flags().StringP("secretID", "", "", "secretID")
 	cc.cmd.Flags().StringP("secretKey", "", "", "secretKey")
 	cc.cmd.Flags().StringP("registryID", "", "", "registryID")
-	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE, "config file")
+	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE_HOME, "config file")
 
 	return cc
 }
 
-func (cc *configCmd) getCommand() *cobra.Command {
+func (cc *initCmd) getCommand() *cobra.Command {
 	return cc.cmd
 }

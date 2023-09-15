@@ -126,7 +126,7 @@ func newRemoveCmd() *removeCmd {
 			return nil
 		},
 	}
-	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE, "config file")
+	cc.cmd.Flags().StringP("config", "", "", "Config file (default \"$HOME/.tcr_access_control.yaml\")")
 	cc.cmd.Flags().StringP("ip", "", "", "IPv4 address (CIDR block) (required)")
 	cc.cmd.Flags().Int64P("index", "", -1, "Policy index number (required)")
 	cc.cmd.Flags().BoolP("no-confirm", "y", false, "Auto yes")

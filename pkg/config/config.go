@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -21,7 +22,7 @@ func LoadConfig(filename string) (*Config, error) {
 	logrus.Debugf("Load config from %q", filename)
 	data, err := os.ReadFile(filename)
 	if err != nil {
-		return nil, fmt.Errorf("LoadConfig: %w", err)
+		return nil, err
 	}
 	config := &Config{}
 	if err := yaml.Unmarshal(data, config); err != nil {
@@ -32,6 +33,10 @@ func LoadConfig(filename string) (*Config, error) {
 
 // SaveConfig saves config into file
 func SaveConfig(config *Config, filename string) error {
+	err := os.MkdirAll(filepath.Dir(filename), 0755)
+	if err != nil {
+		return fmt.Errorf("SaveConfig: %w", err)
+	}
 	data, err := yaml.Marshal(config)
 	if err != nil {
 		return fmt.Errorf("SaveConfig: %w", err)

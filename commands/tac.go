@@ -61,7 +61,7 @@ func (cc *tacCmd) addCommands() {
 		newAllowCmd(),
 		newRemoveCmd(),
 		newStatusCmd(),
-		newConfigCmd(),
+		newInitCmd(),
 		newVersionCmd(),
 	)
 }

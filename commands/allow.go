@@ -67,7 +67,7 @@ func newAllowCmd() *allowCmd {
 		},
 	}
 
-	cc.cmd.Flags().StringP("config", "", utils.TAC_CONFIG_FILE, "Config file")
+	cc.cmd.Flags().StringP("config", "", "", "Config file (default \"$HOME/.tcr_access_control.yaml\")")
 	cc.cmd.Flags().StringP("ip", "", "",
 		"IPv4 address (CIDR block) (required)")
 	cc.cmd.Flags().StringP("description", "d", "", "Description")

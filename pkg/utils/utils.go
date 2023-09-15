@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 
 	"github.com/cnrancher/tcr-access-control/pkg/config"
 	"github.com/sirupsen/logrus"
@@ -16,10 +16,12 @@ var (
 	SECRET_KEY_ENV_NAME  = "TENCENT_CLOUD_SECRET_KEY"
 	REGION_ENV_NAME      = "TENCENT_CLOUD_REGION"
 	REGISTRY_ID_ENV_NAME = "TENCENT_CLOUD_REGISTRY_ID"
-	TAC_CONFIG_FILE      = path.Join(
-		os.Getenv("HOME"),
-		".tcr_access_control.yaml",
-	)
+
+	// TAC_CONFIG_FILE_HOME is $HOME/.tcr_access_control.yaml
+	TAC_CONFIG_FILE_HOME = filepath.FromSlash(os.Getenv("HOME") + "/.tcr_access_control.yaml")
+
+	// TAC_CONFIG_FILE_GLOBAL is /etc/tcr-access-control/config.yaml
+	TAC_CONFIG_FILE_GLOBAL = filepath.FromSlash("/etc/tcr-access-control/config.yaml")
 )
 
 var (
@@ -40,11 +42,25 @@ func Init(configPath string) error {
 
 	configInitErrMsg := fmt.Sprintf("execute '%s init' first", os.Args[0])
 
-	// load config
 	var err error
-	Config, err = config.LoadConfig(configPath)
-	if err != nil {
-		return fmt.Errorf("LoadConfig: %w", err)
+	if configPath != "" {
+		Config, err = config.LoadConfig(configPath)
+		if err != nil {
+			return fmt.Errorf("LoadConfig: %w", err)
+		}
+	} else {
+		// try read config from $HOME
+		Config, err = config.LoadConfig(TAC_CONFIG_FILE_HOME)
+		if err != nil {
+			if !os.IsNotExist(err) {
+				return fmt.Errorf("LoadConfig: %w", err)
+			}
+			// try read config from /etc/tcr-access-control/
+			Config, err = config.LoadConfig(TAC_CONFIG_FILE_GLOBAL)
+			if err != nil {
+				return fmt.Errorf("LoadConfig: %w", err)
+			}
+		}
 	}
 
 	if Config.SecretKey == "" || Config.SecretID == "" {
