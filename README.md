@@ -33,6 +33,15 @@ Requirements:
     ......
     ```
 
+    You can also use `--config` option to write config to `/etc/tcr-access-control/config.yaml` to make it available for all users:
+    ```console
+    # tcr-access-control init --config /etc/tcr-access-control/config.yaml
+    17:00:00 [INFO] Start init config:
+    Default language (zh-CN/en-US) (default: en-US):
+    ......
+    17:00:00 [INFO] Saved config to "/etc/tcr-access-control/config.yaml"
+    ```
+
 1. Show existing security policies:
 
     You need to ensure that the External Endpoint (公网访问入口) Status is **Opened** before running this command.
